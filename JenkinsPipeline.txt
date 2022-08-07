@@ -1,0 +1,248 @@
+import java.text.SimpleDateFormat
+import org.apache.commons.lang.StringUtils
+
+
+//startAtStageNo = 0
+startAtStageNo = startAtStage as int
+endAtStageNo = endAtStage as int
+//retryCounter = 0
+
+
+def groovyscripts
+
+/*****************************************************************************/
+/*** PIPELINE CODE ***/
+/*****************************************************************************/
+node{
+
+    //SetPaths()
+    //set_env_var()
+    
+    
+    stage_id = 0 // initial stage
+/*******************************************************************/
+stage_name = "Stage ${stage_id}: Pull the artifacts"
+print("************************************************************")
+print("*** ${stage_name}:")
+if( (stage_id >= startAtStageNo) && (stage_id <= endAtStageNo) ) {
+
+stage(stage_name) {
+
+sh '''
+    # rm -r Testing
+'''
+CheckoutGit("Project", 'https://github.com/YounessMoua/Testing.git', 'main')
+
+//CheckoutGit("CW1", 'https://github.com/JuliusWo/CW1.git', 'main')
+
+
+} // stage
+    } // if 
+        else {
+stage(stage_name) {
+print("Skip this Stage.")
+}
+}
+   
+
+    stage_id += 1 // initial stage
+/*******************************************************************/
+stage_name = "Stage ${stage_id}: Build"
+print("************************************************************")
+print("*** ${stage_name}:")
+if( (stage_id >= startAtStageNo) && (stage_id <= endAtStageNo) ) {
+
+stage(stage_name) {
+
+/*
+ sh '''
+ cd CW1
+ javac converter.java
+ java converter miles 40
+ '''
+*/
+
+/*sh '''
+
+ cd Testing
+ #javac Calculator.java
+
+ 
+ #javac -d . Calculator.java  -classpath Testing
+ javac -d . -cp "/usr/share/java/junit-jupiter-api-5.3.2.jar" *.java
+ java   myjavaproject.Calculator  myjavaproject.CalculatorTest
+ 
+java -jar /home/youness/junit-platform-console-standalone-1.5.2.jar -cp "/usr/share/java/junit-jupiter-api-5.3.2.jar;." -c  myjavaproject.CalculatorTest
+
+ 
+ 
+ #javac -cp "/usr/share/java/junit-jupiter-api-5.3.2.jar;." CalculatorTest.java
+    
+ 
+ '''*/
+ 
+ sh '''
+
+ cd Project
+
+ javac -d . -cp "/usr/share/java/junit-jupiter-api-5.3.2.jar" converter*.java
+ #javac -d . -cp "/usr/share/java/junit-jupiter-api-5.3.2.jar" converterTest.java
+ 
+   
+ '''
+
+} // stage
+    } // if 
+        else {
+stage(stage_name) {
+print("Skip this Stage.")
+} }
+
+stage_id += 1 // initial stage
+/*******************************************************************/
+stage_name = "Stage ${stage_id}: Execute the Converter with Parameters"
+print("************************************************************")
+print("*** ${stage_name}:")
+if( (stage_id >= startAtStageNo) && (stage_id <= endAtStageNo) ) {
+
+stage(stage_name) {
+
+ 
+ sh '''
+
+ cd Project
+
+java   myproject.converter $unit $value
+
+ '''
+ 
+} // stage
+    } // if 
+        else {
+stage(stage_name) {
+print("Skip this Stage.")
+}
+
+}
+
+stage_id += 1 // initial stage
+/*******************************************************************/
+stage_name = "Stage ${stage_id}: Execute test 1"
+print("************************************************************")
+print("*** ${stage_name}:")
+if( (stage_id >= startAtStageNo) && (stage_id <= endAtStageNo) ) {
+
+stage(stage_name) {
+
+ 
+ sh '''
+
+ cd Project
+
+java -jar /home/youness/junit-platform-console-standalone-1.5.2.jar -cp "/usr/share/java/junit-jupiter-api-5.3.2.jar;." -c  myproject.converterTest
+
+
+ '''
+ 
+} // stage
+    } // if 
+        else {
+stage(stage_name) {
+print("Skip this Stage.")
+}
+
+}
+
+
+
+stage_id += 1 // initial stage
+/*******************************************************************/
+stage_name = "Stage ${stage_id}: Execute test 2"
+print("************************************************************")
+print("*** ${stage_name}:")
+if( (stage_id >= startAtStageNo) && (stage_id <= endAtStageNo) ) {
+
+stage(stage_name) {
+
+ 
+ sh '''
+
+ cd Project
+
+java -jar /home/youness/junit-platform-console-standalone-1.5.2.jar -cp "/usr/share/java/junit-jupiter-api-5.3.2.jar;." -c  myproject.converterValueTest
+
+
+ '''
+ 
+} // stage
+    } // if 
+        else {
+stage(stage_name) {
+print("Skip this Stage.")
+}
+
+}
+
+
+stage_id += 1 // initial stage
+/*******************************************************************/
+stage_name = "Stage ${stage_id}: Execute test 3"
+print("************************************************************")
+print("*** ${stage_name}:")
+if( (stage_id >= startAtStageNo) && (stage_id <= endAtStageNo) ) {
+
+stage(stage_name) {
+
+ 
+ sh '''
+
+ cd Project
+
+java -jar /home/youness/junit-platform-console-standalone-1.5.2.jar -cp "/usr/share/java/junit-jupiter-api-5.3.2.jar;." -c  myproject.converterCheckTest
+
+
+ '''
+ 
+} // stage
+    } // if 
+        else {
+stage(stage_name) {
+print("Skip this Stage.")
+}
+
+}
+}
+
+
+
+
+
+def CheckoutGit(relativeTargetDirectory, repoUrl, branch) {
+print("*** Git Checkout Branch '${branch}' for '${relativeTargetDirectory}'")
+
+scmVars = checkout([
+$class: 'GitSCM',
+branches:
+[
+[
+name: branch
+]
+],
+doGenerateSubmoduleConfigurations: false,
+extensions:
+[
+[$class: 'RelativeTargetDirectory', relativeTargetDir: relativeTargetDirectory],
+[$class: 'CloneOption', depth: 0, noTags: true, reference: '', shallow: false, timeout: 60],
+[$class: 'CleanBeforeCheckout', timeout: 60],
+[$class: 'CheckoutOption', timeout: 30]
+],
+submoduleCfg: [],
+userRemoteConfigs:
+[
+[
+credentialsId: 'github_creds',
+url: repoUrl
+]
+]
+])
+}
