@@ -59,7 +59,7 @@ public class converter {
                         System.out.println(amount + " Nautical Miles = " + f.format(miles) + " Miles or " + f.format(kilom) + " Kilometers");
                         break;
                     default :
-                        System.out.println("The unit is not correct! ");
+                        System.out.println("The unit is not correct ");
                         return 1;
                         
                 }
